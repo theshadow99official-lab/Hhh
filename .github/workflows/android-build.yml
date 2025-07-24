@@ -1,1 +1,55 @@
+name: Build Flutter APK from Source Zip
 
+on:
+  workflow_dispatch:
+    inputs:
+      password:
+        description: 'Enter the build password to proceed'
+        required: true
+
+jobs:
+  build-android:
+    # Only run the job if the provided password is correct
+    if: ${{ github.event.inputs.password == '1234' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the repository to access the source.zip file
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Java environment (required for Android)
+      - name: Set up Java Development Kit
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+
+      # 3. Set up Flutter environment
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      # 4. Extract the zipped source code into the workspace
+      - name: Extract Source Code
+        run: unzip source.zip -d .
+
+      # 5. Navigate into the Flutter project and get dependencies
+      - name: Get Flutter Dependencies
+        run: |
+          cd ping
+          flutter pub get
+        
+      # 6. Build the APK in release mode
+      - name: Build Release APK
+        run: |
+          cd ping
+          flutter build apk --release
+
+      # 7. Upload the generated APK as a downloadable artifact
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ping-Android-Release-APK
+          path: ping/build/app/outputs/flutter-apk/app-release.apk
