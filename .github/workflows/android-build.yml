@@ -17,14 +17,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Set up Java environment - UPDATED TO VERSION 17
+      # 2. Set up Java 17, which is required by the modern Android Gradle Plugin
       - name: Set up Java Development Kit
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17' # <-- THIS IS THE FIX
+          java-version: '17'
 
-      # 3. Set up Flutter environment
+      # 3. Set up the latest stable Flutter SDK
       - name: Set up Flutter SDK
         uses: subosito/flutter-action@v2
         with:
@@ -42,17 +42,23 @@ jobs:
       - name: Integrate Custom App Code
         run: cp -r temp_source/ping/* ping/
 
-      # 7. Get dependencies for the complete project
+      # 7. NEW STEP: Fix the Android NDK version mismatch
+      # This command inserts the required NDK version into the build script.
+      - name: Fix Android NDK Version
+        run: |
+          sed -i '/android {/a \    ndkVersion = "27.0.12077973"' ping/android/app/build.gradle.kts
+        
+      # 8. Get the updated dependencies for the complete project
       - name: Get Flutter Dependencies
         working-directory: ./ping 
         run: flutter pub get
         
-      # 8. Build the release APK
+      # 9. Build the release APK
       - name: Build Release APK
         working-directory: ./ping
         run: flutter build apk --release
 
-      # 9. Upload the generated APK as a downloadable artifact
+      # 10. Upload the generated APK as a downloadable artifact
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
