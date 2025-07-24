@@ -17,12 +17,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Set up Java environment
+      # 2. Set up Java environment - UPDATED TO VERSION 17
       - name: Set up Java Development Kit
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '11'
+          java-version: '17' # <-- THIS IS THE FIX
 
       # 3. Set up Flutter environment
       - name: Set up Flutter SDK
@@ -44,12 +44,12 @@ jobs:
 
       # 7. Get dependencies for the complete project
       - name: Get Flutter Dependencies
-        working-directory: ./ping # Run command inside the project folder
+        working-directory: ./ping 
         run: flutter pub get
         
       # 8. Build the release APK
       - name: Build Release APK
-        working-directory: ./ping # Run command inside the project folder
+        working-directory: ./ping
         run: flutter build apk --release
 
       # 9. Upload the generated APK as a downloadable artifact
